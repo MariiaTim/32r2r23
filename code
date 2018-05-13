@@ -1,0 +1,125 @@
+#include "stdafx.h" 
+#include <iostream> 
+#include <sstream> 
+#include <string> 
+#include <limits> 
+using namespace std;
+
+enum Op {
+	Add,
+	Sub,
+	Mul, 
+	Div,
+	Sqr,
+	Sqrt
+};
+
+class ArgumentParser {
+public:
+	ArgumentParser(string expression) {
+		istringstream is(expression);
+		if (expression[0] == 's' || expression[0] == 'S') {
+			if (expression[3] == 't')
+				operation = Sqrt;
+			else operation = Sqr;
+			string operand = expression.substr(expression.find('(') + 1, expression.find(')') - 1);
+			firstArgument = stoi(operand);
+		}
+		else {
+			is >> firstArgument;
+			char ch;
+			is >> ch;
+			switch (ch)
+			{
+			case '+':
+				operation = Add;
+				break;
+			case '-':
+				operation = Sub;
+				break;
+			case '*':
+				operation = Mul;
+				break;
+			case '/':
+				operation = Div;
+				break;
+			}
+
+			is >> secondArgument;
+		}
+	}
+
+	int FirstArgument() { return firstArgument; }
+	int SecondArgument() { return secondArgument; }
+	Op Operation() { return operation; }
+
+private:
+	int firstArgument;
+	int secondArgument;
+	Op operation;
+};
+
+class Calculator {
+public:
+	void Calculate(string expression) {
+		ArgumentParser argumentParser(expression);
+		switch (argumentParser.Operation())
+		{
+		case Add:
+			cout << DoAdd(argumentParser.FirstArgument(), argumentParser.SecondArgument()) << endl; break;
+		case Sub:
+			cout << DoSub(argumentParser.FirstArgument(), argumentParser.SecondArgument()) << endl; break;
+		case Mul:
+			cout << DoMul(argumentParser.FirstArgument(), argumentParser.SecondArgument()) << endl; break;
+		case Div:
+		{
+			double result = DoDiv(argumentParser.FirstArgument(), argumentParser.SecondArgument());
+			result == 0 ? cout << "Невозможно выполнить деление на ноль!" << endl : cout << result << endl;
+		} break;
+		case Sqr:
+			cout << DoSqr(argumentParser.FirstArgument()) << endl; break;
+		case Sqrt:
+		{
+			double result = DoSqrt(argumentParser.FirstArgument());;
+			result == -1 ? cout << "Невозможно вычислить корень отрицательного числа!" << endl : cout << result << endl;
+		} break;
+		default:
+			cout << "Ошибка ввода!" << endl;
+		}
+		cout << endl;
+	}
+
+private:
+	int DoAdd(int x, int y) { return x + y; }
+	int DoSub(int x, int y) { return x - y; }
+	int DoMul(int x, int y) { return x * y; }
+	double DoDiv(int x, int y) {
+		if (y == 0)
+			return 0;
+		else
+			return double(x) / double(y);
+	}
+	int DoSqr(int x) { return x * x; }
+	double DoSqrt(int x) {
+		if (x < 0)
+			return -1;
+		else
+			return sqrt(x);
+	}
+};
+
+int main() {
+	Calculator calculator;
+	setlocale(LC_ALL, "rus");
+	string input;
+	while (true) {
+		cout << "" << endl;
+		cin >> input;
+		if (input == "exit")
+			cout << "Ошибка ввода!" << endl;
+		else
+			calculator.Calculate(input);
+	}
+	system("pause");
+	return 0;
+}
